@@ -7,6 +7,7 @@ import (
 	"github.com/kayx-org/frida/topology"
 	"github.com/streadway/amqp"
 	"os"
+	"time"
 )
 
 type logger interface {
@@ -74,10 +75,15 @@ func (f *Frida) PublishMessage(message *Message) error {
 		return err
 	}
 
+	timestamp := time.Now()
+	if message.timestamp != nil {
+		timestamp = *message.timestamp
+	}
+
 	if err := channel.Publish("bus", message.topic.String(), false, false, amqp.Publishing{
 		Headers:     nil,
 		ContentType: "applications/json",
-		Timestamp:   message.timestamp,
+		Timestamp:   timestamp,
 		Body:        body,
 	}); err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
@@ -131,7 +137,7 @@ func (f *Frida) consume(msg <-chan amqp.Delivery, channel *amqp.Channel, handler
 		}
 
 		translatedMsg := NewMessage(m.Body, Topic(m.RoutingKey))
-		translatedMsg.timestamp = m.Timestamp
+		translatedMsg.timestamp = &m.Timestamp
 		if err := handler(translatedMsg); err != nil {
 			if err := m.Nack(false, false); err != nil {
 				f.logger.Errorf("unable to nack topic '%s': %s", m.RoutingKey, err)

@@ -14,17 +14,16 @@ func (t Topic) String() string {
 }
 
 type Message struct {
-	event      interface{}
+	event     interface{}
 	topic     Topic
-	timestamp time.Time
+	timestamp *time.Time
 	ctx       *context.Context
 }
 
 func NewMessage(event interface{}, topic Topic) *Message {
 	return &Message{
-		event:      event,
-		topic:     topic,
-		timestamp: time.Now(),
+		event: event,
+		topic: topic,
 	}
 }
 
@@ -41,6 +40,11 @@ func (m *Message) WithContext(ctx context.Context) *Message {
 	return m
 }
 
+func (m *Message) WithTimestamp(timestamp time.Time) *Message {
+	m.timestamp = &timestamp
+	return m
+}
+
 func (m *Message) GetBody() ([]byte, error) {
 	if res, err := json.Marshal(m.event); err != nil {
 		return nil, fmt.Errorf("unable to unmarshall message '%s': %w", m.topic, err)
@@ -53,6 +57,6 @@ func (m *Message) GetTopic() string {
 	return m.topic.String()
 }
 
-func (m *Message) GetTimestamp() time.Time {
+func (m *Message) GetTimestamp() *time.Time {
 	return m.timestamp
 }
