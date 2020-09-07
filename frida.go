@@ -69,11 +69,16 @@ func (f *Frida) PublishMessage(message *Message) error {
 		return fmt.Errorf("unable to create channel: %w", err)
 	}
 
+	body, err := message.GetBody()
+	if err != nil {
+		return err
+	}
+
 	if err := channel.Publish("bus", message.topic.String(), false, false, amqp.Publishing{
 		Headers:     nil,
 		ContentType: "applications/json",
 		Timestamp:   message.timestamp,
-		Body:        message.body,
+		Body:        body,
 	}); err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}

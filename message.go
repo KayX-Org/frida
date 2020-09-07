@@ -2,6 +2,8 @@ package frida
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -12,15 +14,15 @@ func (t Topic) String() string {
 }
 
 type Message struct {
-	body      []byte
+	event      interface{}
 	topic     Topic
 	timestamp time.Time
 	ctx       *context.Context
 }
 
-func NewMessage(body []byte, topic Topic) *Message {
+func NewMessage(event interface{}, topic Topic) *Message {
 	return &Message{
-		body:      body,
+		event:      event,
 		topic:     topic,
 		timestamp: time.Now(),
 	}
@@ -39,8 +41,12 @@ func (m *Message) WithContext(ctx context.Context) *Message {
 	return m
 }
 
-func (m *Message) GetBody() []byte {
-	return m.body
+func (m *Message) GetBody() ([]byte, error) {
+	if res, err := json.Marshal(m.event); err != nil {
+		return nil, fmt.Errorf("unable to unmarshall message '%s': %w", m.topic, err)
+	} else {
+		return res, nil
+	}
 }
 
 func (m *Message) GetTopic() string {
