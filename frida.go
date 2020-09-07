@@ -80,10 +80,11 @@ func (f *Frida) PublishMessage(message *Message) error {
 	}
 
 	if err := channel.Publish("bus", message.Topic().String(), false, false, amqp.Publishing{
-		Headers:     nil,
-		ContentType: "applications/json",
-		Timestamp:   timestamp,
-		Body:        message.Body(),
+		Headers:      nil,
+		ContentType:  "applications/json",
+		Timestamp:    timestamp,
+		Body:         message.Body(),
+		DeliveryMode: amqp.Persistent,
 	}); err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}
