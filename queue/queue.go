@@ -40,14 +40,14 @@ func (q *Queue) arguments() map[string]interface{} {
 }
 
 func (q *Queue) CreateQueue() error {
-	if _, err := q.channel.QueueDeclare(q.Name(), true, true, false, false, q.arguments()); err != nil {
+	if _, err := q.channel.QueueDeclare(q.Name(), true, false, false, false, q.arguments()); err != nil {
 		return fmt.Errorf("unable to create queue '%s': %w", q.Name(), err)
 	}
 	if err := q.channel.QueueBind(q.Name(), q.topic, q.bucket, false, amqp.Table{}); err != nil {
 		return fmt.Errorf("unable to bind queue '%s': %w", q.Name(), err)
 	}
 
-	if _, err := q.channel.QueueDeclare(q.nameDlx(), true, true, false, false, q.arguments()); err != nil {
+	if _, err := q.channel.QueueDeclare(q.nameDlx(), true, false, false, false, q.arguments()); err != nil {
 		return fmt.Errorf("unable to create dlx queue '%s': %w", q.nameDlx(), err)
 	}
 	if err := q.channel.QueueBind(q.nameDlx(), q.Name(), q.bucketDlx(), false, amqp.Table{}); err != nil {

@@ -29,10 +29,10 @@ func (t *TopologyCreator) CreateTopology(ctx context.Context) error {
 }
 
 func (t *TopologyCreator) createExchange(_ context.Context, channel *amqp.Channel) error {
-	if err := channel.ExchangeDeclare("bus", "fanout", true, true, false, false, amqp.Table{}); err != nil {
+	if err := channel.ExchangeDeclare("bus", "fanout", true, false, false, false, amqp.Table{}); err != nil {
 		return fmt.Errorf("unable to create the bus exchange: %w", err)
 	}
-	if err := channel.ExchangeDeclare(t.bucket, "topic", true, true, false, false, amqp.Table{}); err != nil {
+	if err := channel.ExchangeDeclare(t.bucket, "topic", true, false, false, false, amqp.Table{}); err != nil {
 		return fmt.Errorf("unable to create the topic exchange: %w", err)
 	}
 
@@ -44,10 +44,10 @@ func (t *TopologyCreator) createExchange(_ context.Context, channel *amqp.Channe
 }
 
 func (t *TopologyCreator) createExchangeDlx(_ context.Context, channel *amqp.Channel) error {
-	if err := channel.ExchangeDeclare("bus-dlx", "fanout", true, true, false, false, amqp.Table{}); err != nil {
+	if err := channel.ExchangeDeclare("bus-dlx", "fanout", true, false, false, false, amqp.Table{}); err != nil {
 		return fmt.Errorf("unable to create the bus exchange: %w", err)
 	}
-	if err := channel.ExchangeDeclare(t.bucketDlx, "topic", true, true, false, false, amqp.Table{}); err != nil {
+	if err := channel.ExchangeDeclare(t.bucketDlx, "topic", true, false, false, false, amqp.Table{}); err != nil {
 		return fmt.Errorf("unable to create the topic exchange: %w", err)
 	}
 
