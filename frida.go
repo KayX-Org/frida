@@ -132,6 +132,7 @@ func (f *Frida) runHandler(_ context.Context, topic Topic, handler Handler) erro
 }
 
 func (f *Frida) Stop(_ context.Context) error {
+	f.consuming = false
 	return f.connection.Close()
 }
 
