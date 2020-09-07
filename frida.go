@@ -70,21 +70,20 @@ func (f *Frida) PublishMessage(message *Message) error {
 		return fmt.Errorf("unable to create channel: %w", err)
 	}
 
-	body, err := message.GetBody()
-	if err != nil {
-		return err
-	}
-
 	timestamp := time.Now()
-	if message.timestamp != nil {
+	if message.Timestamp() != nil {
 		timestamp = *message.timestamp
 	}
 
-	if err := channel.Publish("bus", message.topic.String(), false, false, amqp.Publishing{
+	if err := message.parseBody(); err != nil {
+		return nil
+	}
+
+	if err := channel.Publish("bus", message.Topic().String(), false, false, amqp.Publishing{
 		Headers:     nil,
 		ContentType: "applications/json",
 		Timestamp:   timestamp,
-		Body:        body,
+		Body:        message.Body(),
 	}); err != nil {
 		return fmt.Errorf("unable to publish message: %s", err)
 	}
@@ -136,7 +135,7 @@ func (f *Frida) consume(msg <-chan amqp.Delivery, channel *amqp.Channel, handler
 			return
 		}
 
-		translatedMsg := NewMessage(m.Body, Topic(m.RoutingKey))
+		translatedMsg := newMessage(m.Body, Topic(m.RoutingKey))
 		translatedMsg.timestamp = &m.Timestamp
 		if err := handler(translatedMsg); err != nil {
 			if err := m.Nack(false, false); err != nil {

@@ -14,20 +14,28 @@ func (t Topic) String() string {
 }
 
 type Message struct {
-	event     interface{}
+	body      []byte
+	event     Event
 	topic     Topic
 	timestamp *time.Time
 	ctx       *context.Context
 }
 
-func NewMessage(event interface{}, topic Topic) *Message {
+func newMessage(body []byte, topic Topic) *Message {
 	return &Message{
-		event: event,
+		body:  body,
 		topic: topic,
 	}
 }
 
-func (m *Message) GetContext() context.Context {
+func NewMessage(event Event) *Message {
+	return &Message{
+		event: event,
+		topic: event.Topic(),
+	}
+}
+
+func (m *Message) Context() context.Context {
 	if m.ctx != nil {
 		return *m.ctx
 	}
@@ -45,18 +53,28 @@ func (m *Message) WithTimestamp(timestamp time.Time) *Message {
 	return m
 }
 
-func (m *Message) GetBody() ([]byte, error) {
-	if res, err := json.Marshal(m.event); err != nil {
-		return nil, fmt.Errorf("unable to unmarshall message '%s': %w", m.topic, err)
-	} else {
-		return res, nil
+func (m *Message) parseBody() error {
+	if m.event == nil {
+		return nil
 	}
+
+	body, err := json.Marshal(m.event)
+	if err != nil {
+		return fmt.Errorf("unable to unmarshall event '%s': %w", m.topic, err)
+	}
+	m.body = body
+
+	return nil
 }
 
-func (m *Message) GetTopic() string {
-	return m.topic.String()
+func (m *Message) Body() []byte {
+	return m.body
 }
 
-func (m *Message) GetTimestamp() *time.Time {
+func (m *Message) Topic() Topic {
+	return m.topic
+}
+
+func (m *Message) Timestamp() *time.Time {
 	return m.timestamp
 }

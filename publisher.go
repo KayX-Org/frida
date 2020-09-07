@@ -1,5 +1,9 @@
 package frida
 
+type Event interface {
+	Topic() Topic
+}
+
 type Publisher interface {
 	PublishMessage(message *Message) error
 }
