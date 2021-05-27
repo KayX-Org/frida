@@ -15,6 +15,10 @@ type logger interface {
 	Infof(format string, args ...interface{})
 }
 
+type Register interface {
+	RegisterHandler(topic Topic, handler Handler) error
+}
+
 type topologyCreator interface {
 	CreateTopology(ctx context.Context) error
 }
